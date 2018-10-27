@@ -1,21 +1,22 @@
 package cmc;
 /**
  * Subclase de CmcSC que implementa a CmcTDA
- * El método run es invocado por el botón iniciar.
+ * El mï¿½todo run es invocado por el botï¿½n iniciar.
  * Hereda de CmcSC:
  * 		Objeto MapaInfo
- * 		Método dibujarCamino(List<Punto> camino)
+ * 		Mï¿½todo dibujarCamino(List<Punto> camino)
  * Debe implementar:
- * 		Método run(MapaInfo mapa)
+ * 		Mï¿½todo run(MapaInfo mapa)
  */
 
 import mapa.MapaInfo;
 import tda.CmcSC;
+import solucion.BFS;
 
 public class CmcImple extends CmcSC {
 	
 	public void run(MapaInfo mapa) {
 		this.mapa = mapa;
-		new CmcDemo2(mapa, this);
+		new BFS(mapa, this);
 	}
 }
