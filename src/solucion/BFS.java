@@ -50,91 +50,85 @@ public class BFS {
 //		List<NodoPunto> nodos = new ArrayList<NodoPunto>();
 //		NodoPunto aux = new NodoPunto(a); //Creamos el nodo auxiliar en A
 		
-		Punto p = a;
-		int auxX = x, auxY = y;
-		int densidadMin;
 		
-		while(b.x != x || b.y != y) {
-			densidadMin = 4;			
-			if(x < b.x && mapa.getDensidad(x + 1, y) < 4 && !listaPuntos.contains(new Punto(x + 1, y))) {
+		while((b.x != x || b.y != y) && x >= 0 && x < mapa.LARGO && y >= 0 && y < mapa.ALTO) {			
+			if(x < b.x && cumple(x + 1,y,listaPuntos) && y < b.y && cumple(x,y + 1,listaPuntos)) {
 				x++;
-			} else if (x > b.x && mapa.getDensidad(x - 1, y) < 4 && !listaPuntos.contains(new Punto(x - 1, y))) {
-				x--;
-			} else if(y < b.y && mapa.getDensidad(x, y + 1) < 4 && !listaPuntos.contains(new Punto(x, y + 1))) {
 				y++;
-			} else if (y > b.y && mapa.getDensidad(x, y - 1) < 4 && !listaPuntos.contains(new Punto(x, y - 1))) {
+			} else if (x < b.x && cumple(x + 1,y,listaPuntos) && y > b.y && cumple(x,y - 1,listaPuntos)) {
+				x++;
+				y--;
+			} else if (x > b.x && x > b.x && cumple(x - 1,y,listaPuntos) && y < b.y && cumple(x,y + 1,listaPuntos)) {
+				x--;
+				y++;
+			} else if (x > b.x && x > b.x && cumple(x - 1,y,listaPuntos) && y > b.y && cumple(x,y - 1,listaPuntos)) {
+				x--;
 				y--;
 			} else {
-				if (x < b.x && (mapa.getDensidad(x + 1, y) >= 4 || listaPuntos.contains(new Punto(x + 1, y)))) {
-					if(mapa.getDensidad(x, y + 1) < 4 && !listaPuntos.contains(new Punto(x, y + 1))) {
-						y++;
-					} else if (mapa.getDensidad(x, y - 1) < 4 && !listaPuntos.contains(new Punto(x, y - 1))) {
-						y--;
-					} else {
-						x = b.x;
-						y = b.y;
+				if(y < b.y) {
+					if(cumple(x,y + 1,listaPuntos))y++;
+					else {
+						if(cumple(x + 1,y,listaPuntos)) x++;
+						else if (cumple(x - 1,y,listaPuntos)) x--;
+						else if (cumple(x, y - 1, listaPuntos)) y--;
+						else {
+							System.out.println("ERROR 3");
+							break;
+						}
 					}
-				} else if (x > b.x && (mapa.getDensidad(x - 1, y) >= 4 || !listaPuntos.contains(new Punto(x - 1, y)))) {
-					if(mapa.getDensidad(x, y + 1) < 4) {
-						y++;
-					} else if (mapa.getDensidad(x, y - 1) < 4) {
-						y--;
-					} else {
-						x = b.x;
-						y = b.y;
+				} else if (y > b.y) {
+					if(cumple(x,y - 1,listaPuntos))y--;
+					else {
+						if(cumple(x + 1,y,listaPuntos)) x++;
+						else if (cumple(x - 1,y,listaPuntos)) x--;
+						else if (cumple(x, y+1, listaPuntos)) y++;
+						else {
+							System.out.println("ERROR 4");
+							break;
+						}
+					}
+				}	else if(x < b.x) {
+					if(cumple(x + 1,y,listaPuntos))x++;
+					else if (y == b.y){
+						if(cumple(x,y + 1,listaPuntos)) y++;
+						else if (cumple(x,y -1,listaPuntos)) y--;
+						else if (cumple(x-1, y, listaPuntos)) x--;
+						else {
+							System.out.println("ERROR 1");
+							System.out.println("x: " + x + "y: " + y);
+							break;
+						}
+					}
+				} else if (x > b.x) {
+					if(cumple(x - 1,y,listaPuntos)) x--;
+					else if(y == b.y){
+						if(cumple(x,y + 1,listaPuntos)) y++;
+						else if (cumple(x,y-1,listaPuntos)) y--;
+						else if (cumple(x+1, y, listaPuntos)) x++;
+						else {
+							System.out.println("ERROR 2");							
+							break;
+						}
 					}
 				} 
-				else if (mapa.getDensidad(x, y - 1) == 4 || mapa.getDensidad(x, y +1) == 4) {
-					if (mapa.getDensidad(x - 1, y) < mapa.getDensidad(x + 1, y)) {
-						x--;
-					} else {
-						x++;
-					}
+				else {
+					System.out.println("x: ");
+					break;
 				}
 			}
-			listaPuntos.add(new Punto(x, y));
-			auxX = x;
-			auxY = y;
-		}
-		
-		
-		/*
-		while(x != b.x) {
 			
-			if(x < b.x) {
-				/*if (mapa.getDensidad(x + 1, a.y) < 4) {
-					x++;
-					listaPuntos.add(new Punto(x, y));
-				} else {
-					while((mapa.getDensidad(x + 1, y) >= 4)) {
-						y--;
-					}
-					x--;
-					listaPuntos.add(new Punto(x, y));
-				}
-			} else {
-				listaPuntos.add(new Punto(x, a.y));
-			}
+			listaPuntos.add(new Punto(x, y));
 		}
-		
-		while(y != b.y) {
-			if (y < b.y) {
-				y++;
-				listaPuntos.add(new Punto(x, y));
-			} else {
-				y--;
-				listaPuntos.add(new Punto(x, y));
-			}
-		}*/
 		
 		cmc.dibujarCamino(listaPuntos);
 		return listaPuntos;
 	}
 	
-	private Punto elegirMejor(Punto a, Punto b) {
-		if(mapa.getDensidad(a) <= mapa.getDensidad(b)) {
-			
+	private boolean cumple(int x, int y, List<Punto> puntos) {
+		if(x >= 0 && x < mapa.LARGO && y >= 0 && y < mapa.ALTO) {
+			if(mapa.getDensidad(x, y) < 4 && !puntos.contains(new Punto(x, y))) return true;
+			return false;
 		}
-		return a;
+		return false;
 	}
 }

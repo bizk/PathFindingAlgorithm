@@ -1,25 +1,34 @@
 package solucion;
 
+import java.util.ArrayList;
+
 import graficos.Punto;
 
 public class NodoPunto {
-	private Punto sig;
+	private ArrayList<Punto> puntos;
 	private Punto p;
+	private int densidad;
 	
-	NodoPunto(Punto x){
-		this.sig = null;
+	public NodoPunto(Punto x, int dens, ArrayList<Punto> lista){
 		this.p = x;
-	}
-	
-	public void setSig(Punto aux) {
-		this.sig = aux;
+		this.densidad = dens;
+		this.puntos = lista;
+		puntos.add(x);
 	}
 
+	public ArrayList<Punto> getPuntos() {
+		return puntos;
+	}
+	
 	public Punto getP() {
 		return p;
 	}
-
-	public Punto getSig() {
-		return sig;
+	
+	public ArrayList<Punto> getListaPuntos() {
+		return puntos;
+	}
+	
+	public int getDensidad() {
+		return densidad;
 	}
 }
