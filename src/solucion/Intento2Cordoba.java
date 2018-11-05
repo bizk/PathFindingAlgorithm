@@ -53,9 +53,7 @@ public class Intento2Cordoba {
 		
 		nodo = new NodoPunto(a, mapa.getDensidad(a), new ArrayList<Punto>(), null);
 		listaNodosSolucion.add(nodo);
-		//int index  = 0;
 		
-	//while(itr.hasNext() && (nodo.getP().x != b.x || nodo.getP().y != b.y) && solucion == null) {
 		while(!listaNodosSolucion.isEmpty() && (nodo.getP().x != b.x || nodo.getP().y != b.y) && solucion == null) {
 			if(nodo.getP().x == b.x && nodo.getP().y == b.y) {
 				solucion = nodo;
@@ -77,7 +75,6 @@ public class Intento2Cordoba {
 								}
 								listaNodosSolucion.add(aux);
 								//System.out.println("" + i + ":" + j);
-								//cmc.dibujarCamino(aux.getPuntos());
 							}
 						}
 					}
@@ -85,9 +82,7 @@ public class Intento2Cordoba {
 				listaNodosSolucion.remove(listaNodosSolucion.indexOf(nodo));
 				nodo = elegirMejor(listaNodosSolucion, b);
 			}
-			//index++;
 			//cmc.dibujarCamino(nodo.getPuntos());
-			//nodo = listaNodosSolucion.get(0);
 		}
 		
 		//cmc.dibujarCamino(solucion.getPuntos());
@@ -99,14 +94,10 @@ public class Intento2Cordoba {
 	private NodoPunto elegirMejor(ArrayList<NodoPunto> listaNodos, Punto destino) {
 		NodoPunto mejor = listaNodos.get(0);
 		for(NodoPunto nodo : listaNodos) {
-			if(nodo.getDensidad() < mejor.getDensidad()) {
-				//	System.out.println("La densidad del mejor es: " + mejor.getDensidad() + " peor: " + nodo.getDensidad());
-					mejor = nodo;
-			} else if (nodo.getDensidad() == mejor.getDensidad()){
-				if (Math.abs(nodo.getP().x - destino.x) + Math.abs(nodo.getP().y - destino.y) < Math.abs(mejor.getP().x - destino.x) + Math.abs(mejor.getP().y - destino.y)) {
-					//System.out.println("elegimos uno mejor");
-					mejor = nodo;
-				}
+			if (Math.abs(nodo.getP().x - destino.x) + Math.abs(nodo.getP().y - destino.y) < Math.abs(mejor.getP().x - destino.x) + Math.abs(mejor.getP().y - destino.y)) {
+				mejor = nodo;
+			} else if (Math.abs(nodo.getP().x - destino.x) + Math.abs(nodo.getP().y - destino.y) == Math.abs(mejor.getP().x - destino.x) + Math.abs(mejor.getP().y - destino.y)) {
+				if(nodo.getDensidad() < mejor.getDensidad()) mejor = nodo;
 			}
 		}
 		//System.out.println("Act: [" + mejor.getP().x + ":" + mejor.getP().y + "]" +"-> [" + destino.x + ":" + destino.y + "]");
