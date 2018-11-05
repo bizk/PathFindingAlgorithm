@@ -2,10 +2,10 @@ package solucion;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
+
+import java.lang.Math.*;
 
 import cmc.CmcImple;
 import graficos.Punto;
@@ -43,9 +43,10 @@ public class Intento2Cordoba {
 	}
 	
 	private List<Punto> expandirPuntosContiguos(Punto a, Punto b) {
-		//ArrayList<Punto> listaPuntos = new ArrayList<Punto>();
+		List<Punto> listaPuntos = new ArrayList<Punto>();
 		//ArrayList<NodoPunto> listaNodos = new ArrayList<NodoPunto>();
 		ArrayList<NodoPunto> listaNodosSolucion = new ArrayList<NodoPunto>();
+		int densidad;
 		
 		NodoPunto aux = null;
 		NodoPunto nodo = null;
@@ -53,41 +54,64 @@ public class Intento2Cordoba {
 		
 		nodo = new NodoPunto(a, mapa.getDensidad(a), new ArrayList<Punto>(), null);
 		listaNodosSolucion.add(nodo);
-		int index  = 0;
 		
-	//while(itr.hasNext() && (nodo.getP().x != b.x || nodo.getP().y != b.y) && solucion == null) {
 		while(!listaNodosSolucion.isEmpty() && (nodo.getP().x != b.x || nodo.getP().y != b.y) && solucion == null) {
 			if(nodo.getP().x == b.x && nodo.getP().y == b.y) {
 				solucion = nodo;
 			} else {
+				listaPuntos = nodo.getPuntos();
 				for(int i = nodo.getP().x - 1; i <= nodo.getP().x +1 ; i++) {
 					for(int j = nodo.getP().y - 1; j <= nodo.getP().y + 1; j++) {
 						if(i == b.x && j == b.y) {
 							System.out.println("Encontrado");
 							solucion = nodo;
 							break;
-						}else if(chequearPunto(i, j, nodo) && !(i == nodo.getP().x && j == nodo.getP().y)) {
-							aux = new NodoPunto(new Punto(i,j), mapa.getDensidad(i, j) + nodo.getDensidad() + 1, nodo.getPuntos(), nodo);
+						} else if (chequearPunto(i, j, nodo) && !(i == nodo.getP().x && j == nodo.getP().y)) {
+							Punto punto = new Punto(i,j);
+							if(esDiagonal(nodo.getP(), punto)) densidad = mapa.getDensidad(i, j)*141 + nodo.getDensidad() + 141;
+							else densidad = mapa.getDensidad(i, j)*100 + nodo.getDensidad() + 100; 
+							aux = new NodoPunto(punto	, densidad, listaPuntos, nodo);
 							if(chequearNodos(listaNodosSolucion, aux)) {
 								if(listaNodosSolucion.contains(aux)) {
 									listaNodosSolucion.remove(listaNodosSolucion.indexOf(aux));
 								}
 								listaNodosSolucion.add(aux);
 								//System.out.println("" + i + ":" + j);
-								//cmc.dibujarCamino(aux.getPuntos());
 							}
 						}
 					}
 				}
-				//listaNodosSolucion.remove(nodo);
+				listaNodosSolucion.remove(listaNodosSolucion.indexOf(nodo));
+				nodo = elegirMejor(listaNodosSolucion, b);
 			}
-			index++;
-			nodo = listaNodosSolucion.get(index);
+			//cmc.dibujarCamino(nodo.getPuntos());
 		}
 		
 		//cmc.dibujarCamino(solucion.getPuntos());
 		//imprimirPuntos(solucion.getPuntos());
+		System.out.println("Costo: " +solucion.getDensidad());
 		return obtenerCamino(solucion);
+	}
+	
+	private boolean esDiagonal(Punto nodo, Punto punto) {
+		if(punto.x == nodo.x -1 && punto.y == nodo.y - 1 ) return true;
+		else if (punto.x == nodo.x - 1 && punto.y == nodo.y + 1) return true;
+		else if (punto.x == nodo.x + 1 && punto.y == nodo.y + 1) return true;
+		else if (punto.x == nodo.x + 1 && punto.y == nodo.y - 1) return true;
+		return false;
+	}
+	
+	private NodoPunto elegirMejor(ArrayList<NodoPunto> listaNodos, Punto destino) {
+		NodoPunto mejor = listaNodos.get(0);
+		for(NodoPunto nodo : listaNodos) {
+			if (Math.abs(nodo.getP().x - destino.x) + Math.abs(nodo.getP().y - destino.y) + nodo.getDensidad() < Math.abs(mejor.getP().x - destino.x) + Math.abs(mejor.getP().y - destino.y) + mejor.getDensidad()) {
+				mejor = nodo;
+			} else if (Math.abs(nodo.getP().x - destino.x) + Math.abs(nodo.getP().y - destino.y) + nodo.getDensidad() == Math.abs(mejor.getP().x - destino.x) + Math.abs(mejor.getP().y - destino.y) + mejor.getDensidad()) {
+				if(nodo.getDensidad() < mejor.getDensidad()) mejor = nodo;
+			}
+		}
+		//System.out.println("Act: [" + mejor.getP().x + ":" + mejor.getP().y + "]" +"-> [" + destino.x + ":" + destino.y + "]");
+		return mejor;
 	}
 	
 	private List<Punto> obtenerCamino(NodoPunto solucion) {
@@ -101,17 +125,10 @@ public class Intento2Cordoba {
 		return caminito;
 	}
 	
-	private void imprimirPuntos(List<Punto> list) {
-		for (Punto punto : list) {
-			System.out.print("[" + punto.x + ":" + punto.y + "]");
-			System.out.println();
-		}
-		System.out.println("Partida x: " + list.get(0).x + ":" + list.get(list.size()-1));
-	}
-	
 	private boolean chequearPunto(int x, int y, NodoPunto nodo) {
 		if(x >= 0 && x < mapa.LARGO && y >= 0 && y < mapa.ALTO) {
-			if(mapa.getDensidad(x, y) < 4 && !nodo.getPuntos().contains(new Punto(x,y))) {
+			Punto pto = new Punto(x, y);
+			if(mapa.getDensidad(x, y) < 4 && !nodo.getPuntos().contains(pto)) {
 				return true;
 			}
 		}
@@ -121,22 +138,20 @@ public class Intento2Cordoba {
 	private boolean chequearNodos(ArrayList<NodoPunto> lista, NodoPunto nodo) {
 		boolean esMejor = false;
 		boolean iguales = false;
-		Iterator<NodoPunto> tr = lista.iterator();
+		Iterator<NodoPunto> tr = lista.listIterator();
 		NodoPunto aux = tr.next();
 		while(!tr.hasNext()) {
-			/*if((nodo.getP().y != aux.getP().y)  (nodo.getP().x != aux.getP().x)) {
-				System.out.print("nodos diferentes");
-				System.out.println("nodo A: " + nodo.getDensidad() + "b:" + aux.getDensidad());
-				if(nodo.getDensidad() = aux.getDensidad()) {
-					System.out.println("Nodo agrgado " + aux.getDensidad());
-					esMejor = false;
-				}
-			}*/
-			
-			//System.out.print(aux.getP().x + ":" + aux.getP().y);
-			//System.out.println(nodo.getP().x + ":" + nodo.getP().y);
-			if(nodo.getP().igual(aux.getP())) {
-				iguales = true;
+			Punto pto = aux.getP();
+			Punto ptoNodo = nodo.getP();
+			System.out.println("X[" + ptoNodo.x + ":" + ptoNodo.y + "]" +"/ [" + pto.x + ":" + pto.y + "]");
+			if(ptoNodo.x == pto.x)
+				System.out.println("X[" + ptoNodo.x + ":" + ptoNodo.y + "]" +"/ [" + pto.x + ":" + pto.y + "]");
+			else if(ptoNodo.y == pto.y)
+				System.out.println("Y[" + ptoNodo.x + ":" + ptoNodo.y + "]" +"/ [" + pto.x + ":" + pto.y + "]");
+			else if(ptoNodo.x == pto.x && ptoNodo.y == pto.y)
+				System.out.println("[" + ptoNodo.x + ":" + ptoNodo.y + "]" +"/ [" + pto.x + ":" + pto.y + "]");
+			if(nodo.getP().igual(pto)) {
+				iguales = true; 
 				System.out.println("oa");
 				if(nodo.getDensidad() <= aux.getDensidad()) {
 					System.out.println("Funciona");
