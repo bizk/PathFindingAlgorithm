@@ -10,12 +10,12 @@ package cmc;
  */
 
 import mapa.MapaInfo;
-import solucion.Intento2Cordoba;
-import solucion.Intento3Cordoba;
+import solucion.Intento3;
+
 import tda.CmcSC;
 public class CmcImple extends CmcSC {
 	public void run(MapaInfo mapa) {
 		this.mapa = mapa;
-		new Intento3Cordoba(mapa, this);
+		new Intento3(mapa, this);
 	}
 }
