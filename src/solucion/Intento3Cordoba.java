@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.PriorityQueue;
 
 import cmc.CmcImple;
 import graficos.Punto;
@@ -14,6 +15,7 @@ import mapa.MapaInfo;
 public class Intento3Cordoba {
 	private MapaInfo mapa;
 	private CmcImple cmc;
+	private NodoPunto[][] matriz;
 	
 	public Intento3Cordoba(MapaInfo mapa, CmcImple cmc) {
 		this.mapa = mapa;
@@ -22,6 +24,7 @@ public class Intento3Cordoba {
 	}
 	
 	private void demoObtenerCamino() {
+		Stopwatch reloj = new Stopwatch();
 		Punto a = null, b = null;	
 		Iterator<Punto> iter = mapa.getPuntos().iterator();
 		List<Punto> listaPuntos = null;
@@ -29,102 +32,94 @@ public class Intento3Cordoba {
 		if (iter.hasNext()) {
 			a = iter.next();
 		
-			//while(iter.hasNext()) {
+			while(iter.hasNext()) {
 				b = iter.next();
 				List<Punto> aux = expandirPuntosContiguos(a, b);
-				//if(aux.size() < minimo) {
-					//minimo = aux.size();
+				if(aux.size() < minimo) {
+					minimo = aux.size();
 					listaPuntos = aux;
-				//}
-			//}
+				}
+			}
 			cmc.dibujarCamino(listaPuntos,Color.red);
-			mapa.enviarMensaje("Camino minimo: " + listaPuntos.size() + " puntos");
+			mapa.enviarMensaje("Camino minimo: " + listaPuntos.size() + " puntos" + reloj.elapsedTime() + " seg");
 		}
 	}
 	
 	private List<Punto> expandirPuntosContiguos(Punto a, Punto b) {
-		ArrayList<NodoPunto> listaNodosSolucion = new ArrayList<NodoPunto>();
+		matriz = new NodoPunto[mapa.LARGO][mapa.ALTO];
+		for (int i = 0; i < mapa.LARGO; i++) {
+			for (int j = 0; j < mapa.ALTO; j++) {
+				matriz[i][j] = null;
+			}
+		}
+		NodoPunto nodo = new NodoPunto(a, mapa.getDensidad(a));
+		matriz[a.x][a.y] = nodo;
+		NodoPunto solucion = matriz[b.x][b.y];
+		NodoPunto aux, inicio = null;
+		PriorityQueue<NodoPunto> nodosExpandibles = new PriorityQueue<NodoPunto>();
+		nodosExpandibles.add(nodo);
+		double limite=-1;
+		Punto pto;
 		
-		NodoPunto nodo = new NodoPunto(a, mapa.getDensidad(a), new ArrayList<Punto>());
-		listaNodosSolucion.add(nodo);
-		
-		public void generarNodos()
-		
-		for(int i = nodo.getP().x - 1; i <= nodo.getP().x +1 ; i++) {
-					for(int j = nodo.getP().y - 1; j <= nodo.getP().y + 1; j++) {
-						if(i == b.x && j == b.y) {
-							System.out.println("Encontrado");
-							solucion = nodo;
-							break;
-						}else if(chequearPunto(i, j, nodo) && !(i == nodo.getP().x && j == nodo.getP().y)) {
-							aux = new NodoPunto(new Punto(i,j), mapa.getDensidad(i, j) + nodo.getDensidad() + 1, nodo.getPuntos());
-							if(chequearNodos(listaNodosSolucion, aux)) {
-								if(listaNodosSolucion.contains(aux)) {
-									listaNodosSolucion.remove(listaNodosSolucion.indexOf(aux));
-								}
-								listaNodosSolucion.add(aux);
-								//System.out.println("" + i + ":" + j);
-								cmc.dibujarCamino(aux.getPuntos());
-							}
-						}
+		while(!nodosExpandibles.isEmpty() && limite == -1) {
+			if(limite==-1 || nodo.getDensidad()<limite) {
+				for (int i = nodo.getP().x - 1; i <= nodo.getP().x + 1; i++) {
+					for (int j = nodo.getP().y - 1; j <= nodo.getP().y + 1; j++) {
+						 pto = new Punto(i,j);
+						 if(pto.igual(b)) {
+							 solucion = new NodoPunto(pto, nodo.getDensidad() + (mapa.getDensidad(pto)+1)+(esDiagonal(nodo.getP(),nodo.getPredecesor().getP())? Math.sqrt(2):1), nodo);
+							 limite= solucion.getDensidad();
+						 } else {
+							 if(chequearPunto(pto, nodo)) {
+								 aux = new NodoPunto(pto, nodo.getDensidad() + (mapa.getDensidad(pto)+1)+(esDiagonal(nodo.getP(),pto)? Math.sqrt(2):1), nodo);
+								 aux.setDistancia(b); 
+								 //cmc.dibujarCamino(getCamino(aux));
+								 if(matriz[i][j] == null) {
+									 matriz[i][j] = aux;
+									 nodosExpandibles.add(aux);
+								 } else {
+									 if(aux.relacionDistanciaDensidad() < matriz[pto.x][pto.y].relacionDistanciaDensidad()) {
+										 nodosExpandibles.remove(matriz[pto.x][pto.y]);
+										 matriz[pto.x][pto.y] = aux;
+										 nodosExpandibles.add(matriz[i][j]);
+									 }
+								 }
+							 }
+						 }
 					}
 				}
-				//listaNodosSolucion.remove(nodo);
 			}
-		
-		cmc.dibujarCamino(solucion.getPuntos());
-		imprimirPuntos(solucion.getPuntos());
-		return solucion.getPuntos();
-	}
-	
-	private void imprimirPuntos(List<Punto> list) {
-		for (Punto punto : list) {
-			System.out.print("[" + punto.x + ":" + punto.y + "]");
-			System.out.println();
+			if(nodo.getP().x == a.x && nodo.getP().y == a.y) inicio = nodo;
+			aux = nodo;
+			nodo = nodosExpandibles.poll();
 		}
-		System.out.println("Partida x: " + list.get(0).x + ":" + list.get(list.size()-1));
+		return getCamino(solucion);
 	}
 	
-	private boolean chequearPunto(int x, int y, NodoPunto nodo) {
+	private List<Punto> getCamino(NodoPunto solucion) {
+		List<Punto> camino = new ArrayList<Punto>();
+		NodoPunto aux = solucion;
+		while (aux!=null) {
+			camino.add(aux.getP());
+			aux=aux.getPredecesor();
+		}
+		return camino;
+	}
+	
+	private boolean esDiagonal(Punto nodo, Punto punto) { //Chequea las 4 posibles diagonales.
+		if((punto.x == nodo.x -1 || punto.y == nodo.y - 1) && (punto.x == nodo.x + 1 || punto.y == nodo.y + 1)) return true;
+		return false; //Si ninguna de las condiciones anteriores es diagonal entonces es falso
+	}
+	
+	private boolean chequearPunto(Punto pto, NodoPunto nodo) {
+		int x = pto.x, y = pto.y;
 		if(x >= 0 && x < mapa.LARGO && y >= 0 && y < mapa.ALTO) {
-			if(mapa.getDensidad(x, y) < 4 && !nodo.getPuntos().contains(new Punto(x,y))) {
+			if(mapa.getDensidad(pto) < 4) {
 				return true;
 			}
 		}
 		return false;
 	}
+}	
+
 	
-	private boolean chequearNodos(ArrayList<NodoPunto> lista, NodoPunto nodo) {
-		boolean esMejor = false;
-		boolean iguales = false;
-		Iterator<NodoPunto> tr = lista.iterator();
-		NodoPunto aux = tr.next();
-		while(!tr.hasNext()) {
-			/*if((nodo.getP().y != aux.getP().y)  (nodo.getP().x != aux.getP().x)) {
-				System.out.print("nodos diferentes");
-				System.out.println("nodo A: " + nodo.getDensidad() + "b:" + aux.getDensidad());
-				if(nodo.getDensidad() = aux.getDensidad()) {
-					System.out.println("Nodo agrgado " + aux.getDensidad());
-					esMejor = false;
-				}
-			}*/
-			
-			//System.out.print(aux.getP().x + ":" + aux.getP().y);
-			//System.out.println(nodo.getP().x + ":" + nodo.getP().y);
-			if(nodo.getP().igual(aux.getP())) {
-				iguales = true;
-				System.out.println("oa");
-				if(nodo.getDensidad() <= aux.getDensidad()) {
-					System.out.println("Funciona");
-					esMejor = true;
-				}
-			}
-			if(tr.hasNext()) aux = tr.next();
-			else break;
-		}
-		if(iguales == false) {
-			return true;
-		}
-		return esMejor;
-	}
-}
