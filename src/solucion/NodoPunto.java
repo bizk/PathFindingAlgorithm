@@ -1,9 +1,15 @@
 package solucion;
 
-import java.util.ArrayList;
-import java.util.List;
 
 import graficos.Punto;
+
+/** PROGRAMACI�N III
+*   TRABAJO PR�CTICO OBLIGATORIO
+*   LU- MA- 2DO CUATRIMESTRE - 2018
+*   INTEGRANTES: Parodi, Federico J., Salvioli, Santiago G., Yanzon, Carlos S.
+*   ENTREGA: Noviembre 12, 2018
+*/
+
 
 
 public class NodoPunto implements Comparable<NodoPunto>{
@@ -42,6 +48,10 @@ public class NodoPunto implements Comparable<NodoPunto>{
 		else this.distancia = Math.sqrt((Math.pow(destino.x-p.x, 2) + Math.pow(destino.y - p.y,2)));		 		 
 	}
 	
+	public double getDistancia() {
+		return this.distancia;
+	}
+	
 	public double relacionDistanciaDensidad() {
 			return this.distancia+this.densidad;
 	}
@@ -56,7 +66,13 @@ public class NodoPunto implements Comparable<NodoPunto>{
 		if(n.relacionDistanciaDensidad() < this.relacionDistanciaDensidad()){
 			return 1;
 		}else if(n.relacionDistanciaDensidad() == this.relacionDistanciaDensidad()){
-			return 0;
+			if (n.getDistancia() < this.getDistancia()) {
+				return 1;
+			} else if (n.getDistancia() > this.getDistancia()){
+				return -1;
+			} else {
+				return 0;
+			}
 		}else{
 			return -1;
 		}
